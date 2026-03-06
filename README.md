@@ -21,7 +21,7 @@ Use pgvector extension to enable vector search.
 
 You can use some embedding model like openai or Google api
 
-### Search Engine
+### Query Processing pipeline
 
 Build a search engine where user can have a query and system should bring the relavant answer.
 
