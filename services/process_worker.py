@@ -3,13 +3,12 @@ from pathlib import Path
 
 import pandas as pd
 import pdfplumber
-from google import genai
-from google.genai import types
 from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
                                     create_async_engine)
 
 from app_settings import settings
 from models.chunks import ChunkInfo, DataFormat
+from services.genai_embedding import GeminiEmbeddingService
 
 DATABASE_URL = "postgresql+asyncpg://{}:{}@{}:{}/{}".format(
         settings.db.user,
@@ -18,6 +17,7 @@ DATABASE_URL = "postgresql+asyncpg://{}:{}@{}:{}/{}".format(
         settings.db.port,
         settings.db.name
     )
+embedding_service = GeminiEmbeddingService()
 
 def process_file(file_name: str):
   return asyncio.run(_async_worker(file_name))
@@ -30,8 +30,8 @@ async def _async_worker(file_name: str):
   
   try:
     chunks:list[dict] = extract_text_and_tables(file_path)
-    vectors_list = get_vectors_as_list(chunks)
-    chunks_with_embedding = [{**dic, "embedding": vector} for vector, dic in zip(vectors_list, chunks)]
+    emeddings = get_embeddings(chunks)
+    chunks_with_embedding = [{**dic, "embedding": vector} for vector, dic in zip(emeddings, chunks)]
 
     # log_chunks_for_debugging(file_name, chunks)
     engine = create_async_engine(DATABASE_URL, pool_pre_ping=True, future=True)
@@ -101,18 +101,13 @@ def log_chunks_for_debugging(file_name:str, chunks:list[dict]):
     print(f'>>>>>>>>>>>>>>Page[{item['page_no']}], Chunk-{idx}, Format[{item['content_type']}] <<<<<<<<<<<<<<<<<<<<<<<<')
     print('\n'.join(item['content']) if item['content_type'] == 'text' else item['content'])
 
-def get_vectors_as_list(chunks = list[dict]) -> list :
+def get_embeddings(chunks: list[dict]) -> list:
+  contents = [dic["content"] for dic in chunks]
   try:
     print('Connecting gemini via Genai-Client SDK --> ')
-    client = genai.Client(api_key=settings.gemini_api_key)
-    response = client.models.embed_content(
-        model='gemini-embedding-001',
-        contents= [dic["content"] for dic in chunks],
-        config=types.EmbedContentConfig(output_dimensionality=1024)
-    )
+    emeddings = embedding_service.embed_contents(contents)
     print('Completed retrieving embeddings--> ')
-    vectors_list = [embedding_content.values for embedding_content in response.embeddings]
-    return vectors_list # Returns list of Vectors Array
+    return emeddings
   except Exception as e:
-    print('-'*40, '\n' , e)
-    client.close()
+    print('-'*40, '\n', e)
+    raise

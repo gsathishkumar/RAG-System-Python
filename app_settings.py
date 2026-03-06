@@ -25,8 +25,9 @@ class FileUploadSettings(BaseModel):
 class Settings(BaseSettings):
     app_name: str
     app_port: int
-    gemini_api_key: str
-    
+    gemini_api_key: str | None = None
+    openai_api_key: str | None = None
+
     db: DatabaseSettings
     file: FileUploadSettings
 

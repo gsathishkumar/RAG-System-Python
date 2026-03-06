@@ -1,10 +1,10 @@
-# Retrieval System
+# Retrieval and Generation System
 
 (Using postgres db with pgvector extension)
 
 #### Concept:
 
-Build a basic Retrieval system that will perform splitting on given pdf document along with tables and convert them in embedding and store embedding in database
+Build a basic Retrieval system that will perform splitting on given pdf documents along with tables and convert them in embedding and store embedding in database. Perform a search operation for the given query from the OpenAI Model.
 
 ## Core Features:
 
@@ -23,7 +23,7 @@ You can use some embedding model like openai or Google api
 
 ### Search Engine
 
-Build a search engine where user can have a query and system should bring the top 5 most similarly chunk from the vector store
+Build a search engine where user can have a query and system should bring the relavant answer.
 
 ## Expected output of Search Engine
 
@@ -34,7 +34,7 @@ If query has row info then it should bring that table chunks
 
 Upload File -> Text/Table(Chunks) → Embedding model → Vector → Store in PostgreSQL (pgvector)
 
-Search Query -> Text → Embedding model → Vector → PostgreSQL (pgvector) -> Similarity search
+Search Query -> Text → Embedding model → Vector → PostgreSQL (pgvector) -> Similarity search -> Generation model -> final answer
 
 ## Libraries Used
 
@@ -49,3 +49,4 @@ Search Query -> Text → Embedding model → Vector → PostgreSQL (pgvector) ->
 - Pdfplumber to extract text and tables from PDF files
 - Panda to convert the tablular data to DataFrames
 - Tabulate to convert the DataFrame to tabular text data
+- OpenAI LLM to generate answer from the context

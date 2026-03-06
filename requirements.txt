@@ -11,3 +11,4 @@ aiofiles
 pgvector
 tabulate
 google-genai
+openai

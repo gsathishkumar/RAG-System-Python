@@ -14,6 +14,8 @@ HANDLERS = {
 
 # Register lifespan & Handler with the app
 app = FastAPI(
+        title="RAG System",
+        description="Retrieval and Generation System",
         lifespan=lifespan, 
         exception_handlers=HANDLERS
     )
